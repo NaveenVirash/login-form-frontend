@@ -1,2 +1,5 @@
 # login-form-frontend
-This repository contains a simple Login Form built using HTML, CSS, and JavaScript, integrated with Firebase Authentication. The project allows users to sign up, log in, and log out securely using Firebase.
+front end of login
+
+Hello there,
+This is material used for the firebase authentication video tutorial, watch the video to learn how to connect the form with firebase database

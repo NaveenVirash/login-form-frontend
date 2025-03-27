@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Comprehensive Unit Converter</title>
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #74b8eb, #acb6e5);
+            color: #000000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .converter {
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(15px);
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+            text-align: center;
+            width: 400px;
+        }
+        h1 {
+            font-size: 1.8em;
+            margin-bottom: 20px;
+        }
+        select, input[type="number"], button {
+            width: 90%;
+            margin: 10px 0;
+            padding: 10px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+        }
+        select, input[type="number"] {
+            background: #f4f4f4;
+            color: #333;
+        }
+        button {
+            background: linear-gradient(135deg, #acb6e5, #74b8eb);
+            color: #fff;
+            border:solid rgba(245, 245, 245, 0.31);
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        button:hover {
+            transform: scale(1.05);
+            background: linear-gradient(135deg, #74b8eb, #acb6e5);
+        }
+        .output {
+            margin-top: 20px;
+            font-size: 1.2em;
+        }
+    </style>
+</head>
+<body>
+    <div class="converter">
+        <h1>Comprehensive Unit Converter</h1>
+        <select id="category" onchange="updateUnits()">
+            <option value="" selected disabled>Select Category</option>
+            <option value="length">Length</option>
+            <option value="mass">Mass</option>
+            <option value="temperature">Temperature</option>
+            <option value="data">Data</option>
+            <option value="time">Time</option>
+        </select>
+        <select id="unitFrom" disabled>
+            <option value="" selected disabled>Select Unit</option>
+        </select>
+        <select id="unitTo" disabled>
+            <option value="" selected disabled>Select Unit</option>
+        </select>
+        <input type="number" id="inputValue" placeholder="Enter value" required>
+        <button onclick="convertUnits()">Convert</button>
+        <div class="output" id="outputResult">Result will appear here</div>
+        <div>
+            <a href="index.html"><button id="logout" style="background: linear-gradient(135deg, #db5984, #df3c4c);width:50%;">LOGOUT</button></a>
+            
+        </div>
+    </div>
+      
+    <script>
+        const units = {
+            length: {
+                meters: 1,
+                kilometers: 1000,
+                centimeters: 0.01,
+                millimeters: 0.001,
+                miles: 1609.34,
+                feet: 0.3048,
+                inches: 0.0254
+            },
+            mass: {
+                grams: 1,
+                kilograms: 1000,
+                milligrams: 0.001,
+                pounds: 453.592,
+                ounces: 28.3495
+            },
+            temperature: {
+                celsius: 1,
+                fahrenheit: (val) => (val - 32) * 5 / 9,
+                kelvin: (val) => val - 273.15
+            },
+            data: {
+                bits: 1,
+                bytes: 8,
+                kilobytes: 8192,
+                megabytes: 8388608,
+                gigabytes: 8589934592
+            },
+            time: {
+                seconds: 1,
+                minutes: 60,
+                hours: 3600,
+                days: 86400,
+                weeks: 604800,
+                months: 2628000,
+                years: 31536000
+            }
+            
+        };
+
+        function updateUnits() {
+            const category = document.getElementById("category").value;
+            const unitFrom = document.getElementById("unitFrom");
+            const unitTo = document.getElementById("unitTo");
+
+            // Clear existing options
+            unitFrom.innerHTML = '<option value="" selected disabled>Select Unit</option>';
+            unitTo.innerHTML = '<option value="" selected disabled>Select Unit</option>';
+
+            if (category && units[category]) {
+                Object.keys(units[category]).forEach(unit => {
+                    const optionFrom = document.createElement("option");
+                    optionFrom.value = unit;
+                    optionFrom.textContent = unit.charAt(0).toUpperCase() + unit.slice(1);
+
+                    const optionTo = document.createElement("option");
+                    optionTo.value = unit;
+                    optionTo.textContent = unit.charAt(0).toUpperCase() + unit.slice(1);
+
+                    unitFrom.appendChild(optionFrom);
+                    unitTo.appendChild(optionTo);
+                });
+
+                unitFrom.disabled = false;
+                unitTo.disabled = false;
+            } else {
+                unitFrom.disabled = true;
+                unitTo.disabled = true;
+            }
+        }
+
+        function convertUnits() {
+            const inputValue = document.getElementById("inputValue").value;
+            const unitFrom = document.getElementById("unitFrom").value;
+            const unitTo = document.getElementById("unitTo").value;
+            const category = document.getElementById("category").value;
+            const outputResult = document.getElementById("outputResult");
+
+            // Validation
+            if (!inputValue || isNaN(inputValue) || !unitFrom || !unitTo || !category) {
+                outputResult.textContent = "Please complete all fields!";
+                return;
+            }
+
+            const value = parseFloat(inputValue);
+
+            if (!units[category][unitFrom] || !units[category][unitTo]) {
+                outputResult.textContent = "Invalid conversion units.";
+                return;
+            }
+
+            // Conversion logic
+            let convertedValue;
+            if (category === 'temperature') {
+                // Temperature conversion needs special handling
+                const baseValue = units[category][unitFrom](value); // Convert to Celsius
+                if (unitTo === 'celsius') {
+                    convertedValue = baseValue;
+                } else {
+                    convertedValue = units[category][unitTo](baseValue); // Convert from Celsius to the target unit
+                }
+            } else {
+                // For other categories
+                const baseValue = value * units[category][unitFrom]; // Convert to base unit
+                convertedValue = baseValue / units[category][unitTo]; // Convert to target unit
+            }
+
+            outputResult.textContent = `Converted Value: ${convertedValue.toFixed(6)} ${unitTo}`;
+        }
+    </script>
+</body>
+</html>
